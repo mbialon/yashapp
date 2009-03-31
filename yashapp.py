@@ -3,6 +3,11 @@ import cgi
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp.util import run_wsgi_app
 
+from pygments import highlight
+from pygments.lexers import get_lexer_by_name
+from pygments.formatters import HtmlFormatter
+
+
 class MainPage(webapp.RequestHandler):
   def get(self):
     self.response.out.write("""
@@ -37,8 +42,21 @@ class MainPage(webapp.RequestHandler):
 class Format(webapp.RequestHandler):
   def post(self):
     snippet = self.request.get('snippet')
-    formatted_snippet = snippet 
-    self.response.out.write(formatted_snippet)
+    f = SnippetFormatter(snippet)
+    self.response.out.write(f.format())
+
+class SnippetFormatter:
+  def __init__(self, snippet):
+    self.snippet = snippet
+
+  def format(self):
+    return highlight(self.snippet, self.lexer(), self.formatter())
+
+  def lexer(self):
+    return get_lexer_by_name("html", stripall=True)
+
+  def formatter(self):
+    return HtmlFormatter(lineos=True)
 
 app = webapp.WSGIApplication([('/', MainPage), ('/format', Format)], debug=True)
 
