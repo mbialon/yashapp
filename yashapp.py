@@ -96,6 +96,7 @@ class MainPage(webapp.RequestHandler):
 .highlight .il { color: #666666 } /* Literal.Number.Integer.Long */
         </style>
       <body>
+        <h1>Yet Another Syntax Highlighter</h1>
         <form action="/format" method="post">
           <div><textarea id="snippet" name="snippet" rows="10" cols="80"></textarea></div>
           <div>
