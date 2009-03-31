@@ -18,6 +18,7 @@ class MainPage(webapp.RequestHandler):
                 { snippet: snippet },
                 function(data) {
                   $("#formatted_snippet").text(data);
+                  $("#preview_formatted_snippet").html(data);
                 });
               return false;
             });
@@ -28,6 +29,7 @@ class MainPage(webapp.RequestHandler):
           <div><textarea id="snippet" name="snippet" rows="10" cols="80"></textarea></div>
           <div><input id="execute_format" type="submit" value="Format"></div>
           <div><textarea id="formatted_snippet" rows="10" cols="80"></textarea></div>
+          <div id="preview_formatted_snippet"></div>
         </form>
       </body>
       </html>""")
@@ -35,9 +37,8 @@ class MainPage(webapp.RequestHandler):
 class Format(webapp.RequestHandler):
   def post(self):
     snippet = self.request.get('snippet')
-    formatted_snippet = cgi.escape(snippet)
+    formatted_snippet = snippet 
     self.response.out.write(formatted_snippet)
-    self.response.out.write("foobar")
 
 app = webapp.WSGIApplication([('/', MainPage), ('/format', Format)], debug=True)
 
