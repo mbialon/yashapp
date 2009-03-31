@@ -98,12 +98,12 @@ class MainPage(webapp.RequestHandler):
       <body>
         <h1>Yet Another Syntax Highlighter</h1>
         <form action="/format" method="post">
-          <div><textarea id="snippet" name="snippet" rows="10" cols="80"></textarea></div>
+          <div><textarea id="snippet" name="snippet" rows="16" cols="80"></textarea></div>
           <div>
             <select name="lexer">""" + lexer_options + """</select>
             <input id="execute_format" type="submit" value="Format">
           </div>
-          <div><textarea id="formatted_snippet" rows="10" cols="80"></textarea></div>
+          <div><textarea id="formatted_snippet" rows="16" cols="80"></textarea></div>
           <div id="preview_formatted_snippet"></div>
         </form>
       </body>
