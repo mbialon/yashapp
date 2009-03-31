@@ -5,11 +5,12 @@ from google.appengine.ext.webapp.util import run_wsgi_app
 
 from pygments import highlight
 from pygments.lexers import get_lexer_by_name
+from pygments.lexers import get_all_lexers
 from pygments.formatters import HtmlFormatter
-
 
 class MainPage(webapp.RequestHandler):
   def get(self):
+    lexer_options = "".join(sorted('<option value="' + lex[1][0] + '">' + lex[0] + '</option>' for lex in get_all_lexers()))
     self.response.out.write("""
       <html>
       <head>
@@ -19,8 +20,9 @@ class MainPage(webapp.RequestHandler):
           google.setOnLoadCallback(function() {
             $("input#execute_format").click(function() {
               var snippet = $("#snippet").val();
+              var lexer = $("select").val();
               $.post("/format",
-                { snippet: snippet },
+                { snippet: snippet, lexer: lexer },
                 function(data) {
                   $("#formatted_snippet").text(data);
                   $("#preview_formatted_snippet").html(data);
@@ -30,7 +32,7 @@ class MainPage(webapp.RequestHandler):
           });
         </script>
         <style>
-        .highlight .hll { background-color: #ffffcc }
+.highlight .hll { background-color: #ffffcc }
 .highlight  { background: #f8f8f8; }
 .highlight .c { color: #408080; font-style: italic } /* Comment */
 .highlight .err { border: 1px solid #FF0000 } /* Error */
@@ -96,7 +98,10 @@ class MainPage(webapp.RequestHandler):
       <body>
         <form action="/format" method="post">
           <div><textarea id="snippet" name="snippet" rows="10" cols="80"></textarea></div>
-          <div><input id="execute_format" type="submit" value="Format"></div>
+          <div>
+            <select name="lexer">""" + lexer_options + """</select>
+            <input id="execute_format" type="submit" value="Format">
+          </div>
           <div><textarea id="formatted_snippet" rows="10" cols="80"></textarea></div>
           <div id="preview_formatted_snippet"></div>
         </form>
@@ -106,13 +111,15 @@ class MainPage(webapp.RequestHandler):
 class Format(webapp.RequestHandler):
   def post(self):
     snippet = self.request.get('snippet')
-    f = SnippetFormatter(snippet)
+    lexer_name = self.request.get('lexer')
+    f = SnippetFormatter(snippet, lexer_name)
     self.response.out.write(f.format())
     #self.response.out.write(f.get_style_defs())
 
 class SnippetFormatter:
-  def __init__(self, snippet):
+  def __init__(self, snippet, lexer_name):
     self.snippet = snippet
+    self.lexer_name = lexer_name
 
   def format(self):
     return highlight(self.snippet, self.lexer(), self.formatter())
@@ -121,10 +128,10 @@ class SnippetFormatter:
     return self.formatter().get_style_defs('.highlight')
 
   def lexer(self):
-    return get_lexer_by_name("html", stripall=True)
+    return get_lexer_by_name(self.lexer_name, stripall=True)
 
   def formatter(self):
-    return HtmlFormatter(lineos=True)
+    return HtmlFormatter()
 
 app = webapp.WSGIApplication([('/', MainPage), ('/format', Format)], debug=True)
 
